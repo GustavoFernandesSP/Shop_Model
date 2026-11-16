@@ -1,0 +1,795 @@
+﻿
+===== pom.xml =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.2</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.loja</groupId>
+	<artifactId>shop</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name/>
+	<description/>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.13</version>
+        </dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+					<execution>
+						<id>default-testCompile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
+								</path>
+							</annotationProcessorPaths>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
+
+===== .\src\main\java\com\loja\shop\ShopApplication.java =====
+
+package com.loja.shop;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ShopApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ShopApplication.class, args);
+	}
+
+}
+
+
+===== .\src\main\java\com\loja\shop\config\ProductSeeder.java =====
+
+package com.loja.shop.config;
+
+import com.loja.shop.model.Product;
+import com.loja.shop.repository.ProductRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import java.math.BigDecimal;
+
+@Configuration
+public class ProductSeeder {
+    @Bean
+    CommandLineRunner seed(ProductRepository repo) {
+        return args -> {
+            if (repo.count() > 0) return;
+            for (int i = 1; i <= 6; i++) {
+                Product p = new Product();
+                p.setName("Produto " + i);
+                p.setDescription("DescriÃ§Ã£o do produto " + i);
+                p.setPrice(new BigDecimal("19.90").multiply(BigDecimal.valueOf(i)));
+                p.setImage("https://picsum.photos/seed/loja" + i + "/400/400");
+                p.setCategory("geral");
+                repo.save(p);
+            }
+        };
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\config\SecurityConfig.java =====
+
+package com.loja.shop.config;
+
+import com.loja.shop.security.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtFilter) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())   // cookie SameSite=Lax + CORS restrito; revisar para produÃ§Ã£o
+            .cors(Customizer.withDefaults())
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(a -> a
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/register", "/api/login", "/api/logout", "/api/get-products").permitAll()
+                .anyRequest().authenticated())
+            // o front sempre faz response.json(), entÃ£o 401 tambÃ©m precisa devolver JSON
+            .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) -> {
+                res.setStatus(401);
+                res.setContentType("application/json;charset=UTF-8");
+                res.getWriter().write("{\"error\":\"Unauthorized\"}");
+            }))
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource(
+            @Value("${app.cors.allowed-origins}") List<String> origins) {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(origins);                 // com credentials nÃ£o pode ser "*"
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);                  // front usa credentials: "include"
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\controller\ApiResponse.java =====
+
+package com.loja.shop.controller;
+
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
+
+final class ApiResponse {
+    private ApiResponse() {}
+    static ResponseEntity<Map<String, Object>> error(int status, String message) {
+        return ResponseEntity.status(status).body(Map.of("error", message));
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\controller\AuthController.java =====
+
+package com.loja.shop.controller;
+
+import com.loja.shop.dto.Requests;
+import com.loja.shop.model.AppUser;
+import com.loja.shop.repository.UserRepository;
+import com.loja.shop.security.JwtAuthFilter;
+import com.loja.shop.security.JwtService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class AuthController {
+    private final UserRepository users;
+    private final PasswordEncoder encoder;
+    private final JwtService jwt;
+
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, Object>> register(@RequestBody Requests.Register req) {
+        if (req.email() == null || req.email().isBlank() || req.password() == null || req.password().length() < 6) {
+            return ApiResponse.error(400, "Informe e-mail e uma senha com no mÃ­nimo 6 caracteres");
+        }
+        String email = req.email().trim().toLowerCase();
+        if (users.existsByEmail(email)) {
+            return ApiResponse.error(409, "Este e-mail jÃ¡ estÃ¡ cadastrado");
+        }
+        AppUser u = new AppUser();
+        u.setName(req.username() != null && !req.username().isBlank() ? req.username() : req.name());
+        u.setEmail(email);
+        u.setPasswordHash(encoder.encode(req.password()));
+        users.save(u);
+        return loggedIn(u);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Requests.Login req) {
+        if (req.email() == null || req.password() == null) {
+            return ApiResponse.error(400, "Informe e-mail e senha");
+        }
+        AppUser u = users.findByEmail(req.email().trim().toLowerCase()).orElse(null);
+        if (u == null || !encoder.matches(req.password(), u.getPasswordHash())) {
+            return ApiResponse.error(401, "E-mail ou senha invÃ¡lidos");
+        }
+        return loggedIn(u);
+    }
+
+    // o front chama /logout com GET
+    @GetMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie("", Duration.ZERO).toString())
+                .body(Map.of("message", "Logout realizado"));
+    }
+
+    private ResponseEntity<Map<String, Object>> loggedIn(AppUser u) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("_id", u.getId());   // o front pode ler _id ou id
+        user.put("id", u.getId());
+        user.put("name", u.getName());
+        user.put("username", u.getName());
+        user.put("email", u.getEmail());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie(jwt.create(u.getId()), Duration.ofDays(7)).toString())
+                .body(Map.of("user", user));
+    }
+
+    private ResponseCookie cookie(String value, Duration maxAge) {
+        return ResponseCookie.from(JwtAuthFilter.COOKIE, value)
+                .httpOnly(true)
+                .secure(false)        // em produÃ§Ã£o com HTTPS: true
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(maxAge)
+                .build();
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\controller\OrderController.java =====
+
+package com.loja.shop.controller;
+
+import com.loja.shop.dto.Requests;
+import com.loja.shop.model.*;
+import com.loja.shop.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.time.temporal.ChronoUnit;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class OrderController {
+    private final OrderRepository orders;
+    private final ProductRepository products;
+    private final UserRepository users;
+
+    @PostMapping("/place-order")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> placeOrder(@AuthenticationPrincipal Long userId,
+                                                          @RequestBody Requests.PlaceOrder req) {
+        AppUser user = users.findById(userId).orElse(null);
+        if (user == null) return ApiResponse.error(401, "Unauthorized");
+        if (req.items() == null || req.items().isEmpty()) return ApiResponse.error(400, "Carrinho vazio");
+
+        CustomerOrder o = new CustomerOrder();
+        o.setUser(user);   // usuÃ¡rio vem do token, nÃ£o do user_id do payload
+        o.setDeliveryType(req.delivery_type());
+        o.setPromoCode(req.promo_code());
+        o.setContactNumber(req.contact_number());
+
+        BigDecimal subtotal = BigDecimal.ZERO;
+        int count = 0;
+        for (Requests.CartItem ci : req.items()) {
+            Product p = products.findById(ci.id()).orElse(null);
+            if (p == null) return ApiResponse.error(400, "Produto nÃ£o encontrado: " + ci.id());
+            int qty = ci.quantity() == null ? 1 : Math.max(1, ci.quantity());
+
+            OrderItem it = new OrderItem();
+            it.setOrder(o);
+            it.setProductId(p.getId());
+            it.setName(p.getName());
+            it.setDescription(p.getDescription());
+            it.setProductImage(p.getImage());
+            it.setPrice(p.getPrice());   // preÃ§o SEMPRE do banco, nunca do cliente
+            it.setQuantity(qty);
+            o.getItems().add(it);
+
+            subtotal = subtotal.add(p.getPrice().multiply(BigDecimal.valueOf(qty)));
+            count += qty;
+        }
+        // TODO: calcular o frete no servidor (hoje confia no valor enviado pelo front)
+        BigDecimal delivery = req.delivery_type_cost() == null ? BigDecimal.ZERO : req.delivery_type_cost();
+        o.setDeliveryTypeCost(delivery);
+        o.setTotalItemCount(count);
+        o.setCostBeforeDelivery(subtotal);
+        o.setCostAfterDelivery(subtotal.add(delivery));
+        orders.save(o);
+
+        return ResponseEntity.ok(Map.of("message", "Pedido realizado com sucesso!", "order_id", o.getId()));
+    }
+
+    @GetMapping("/get-orders/{userId}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Map<String, Object>> getOrders(@AuthenticationPrincipal Long me,
+                                                         @PathVariable Long userId) {
+        if (!me.equals(userId)) return ApiResponse.error(403, "Forbidden");
+        List<Map<String, Object>> list = orders.findByUser_IdOrderByCreatedAtDesc(userId)
+                .stream().map(this::toDto).toList();
+        return ResponseEntity.ok(Map.of("orders", list));
+    }
+
+    @PostMapping("/cancel-order")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> cancelOrder(@AuthenticationPrincipal Long me,
+                                                           @RequestBody Requests.CancelOrder req) {
+        CustomerOrder o = req.order_id() == null ? null : orders.findById(req.order_id()).orElse(null);
+        if (o == null || !o.getUser().getId().equals(me)) return ApiResponse.error(404, "Pedido nÃ£o encontrado");
+        if (!"pending".equals(o.getStatus())) return ApiResponse.error(400, "Este pedido nÃ£o pode mais ser cancelado");
+        o.setStatus("cancelled");
+        return ResponseEntity.ok(Map.of("message", "Pedido cancelado", "user_id", me));
+    }
+
+    private Map<String, Object> toDto(CustomerOrder o) {
+        String status = o.getStatus();
+        int days = "Express".equalsIgnoreCase(o.getDeliveryType()) ? 3 : 7;
+
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("_id", String.valueOf(o.getId()));   // o front usa _id.slice(...)
+        m.put("user_id", o.getUser().getId());
+        m.put("status", status);
+        m.put("createdAt", o.getCreatedAt().toString());
+        m.put("expected_delivery_date", o.getCreatedAt().plus(days, ChronoUnit.DAYS).toString());
+        m.put("percentage_complete", percentage(status));
+        m.put("order_cancelled", "cancelled".equals(status));
+        m.put("order_processed", "delivered".equals(status));
+        m.put("totalItemCount", o.getTotalItemCount());
+        m.put("delivery_type", o.getDeliveryType());
+        m.put("delivery_type_cost", o.getDeliveryTypeCost());
+        m.put("cost_before_delivery_rate", o.getCostBeforeDelivery());
+        m.put("cost_after_delivery_rate", o.getCostAfterDelivery());
+        m.put("promo_code", o.getPromoCode());
+        m.put("contact_number", o.getContactNumber());
+        m.put("items", o.getItems().stream().map(i -> {
+            Map<String, Object> im = new LinkedHashMap<>();
+            im.put("_id", i.getProductId());
+            im.put("name", i.getName());
+            im.put("description", i.getDescription());
+            im.put("product_image", i.getProductImage());
+            im.put("price", i.getPrice());
+            im.put("quantity", i.getQuantity());
+            return im;
+        }).toList());
+        return m;
+    }
+
+    // a barra de progresso e as faixas do front dependem destes valores
+    private int percentage(String status) {
+        return switch (String.valueOf(status)) {
+            case "paid" -> 40;
+            case "processing" -> 60;
+            case "shipped" -> 75;
+            case "delivered" -> 100;
+            case "cancelled" -> 0;
+            default -> 10;   // pending
+        };
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\controller\ProductController.java =====
+
+package com.loja.shop.controller;
+
+import com.loja.shop.model.Product;
+import com.loja.shop.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class ProductController {
+    private final ProductRepository products;
+
+    // o front espera um ARRAY direto (data.map(...))
+    @GetMapping("/get-products")
+    public List<Product> getProducts() {
+        return products.findAll();
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\dto\Requests.java =====
+
+package com.loja.shop.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.math.BigDecimal;
+import java.util.List;
+
+public class Requests {
+
+    // CONFIRMAR: campos do formulÃ¡rio de cadastro/login do front
+    public record Register(String name, String username, String email, String password) {}
+    public record Login(String email, String password) {}
+
+    public record CartItem(@JsonProperty("_id") Long id, Integer quantity) {}
+
+    // Nomes iguais ao payload enviado por products.js (confirmOrder)
+    public record PlaceOrder(
+            List<CartItem> items,
+            Integer totalItemCount,
+            String delivery_type,
+            BigDecimal delivery_type_cost,
+            BigDecimal cost_before_delivery_rate,
+            BigDecimal cost_after_delivery_rate,
+            String promo_code,
+            String contact_number,
+            Long user_id) {}
+
+    public record CancelOrder(Long order_id) {}
+}
+
+
+===== .\src\main\java\com\loja\shop\model\AppUser.java =====
+
+package com.loja.shop.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "users")
+@Getter @Setter @NoArgsConstructor
+public class AppUser {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    @Column(unique = true, nullable = false)
+    private String email;
+    @Column(nullable = false)
+    private String passwordHash;
+}
+
+
+===== .\src\main\java\com\loja\shop\model\CustomerOrder.java =====
+
+package com.loja.shop.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "orders")   // "order" Ã© palavra reservada
+@Getter @Setter @NoArgsConstructor
+public class CustomerOrder {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private AppUser user;
+    private Integer totalItemCount;
+    private String deliveryType;
+    private BigDecimal deliveryTypeCost;
+    private BigDecimal costBeforeDelivery;
+    private BigDecimal costAfterDelivery;
+    private String promoCode;
+    private String contactNumber;
+    private String status = "pending";
+    private Instant createdAt = Instant.now();
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
+}
+
+
+===== .\src\main\java\com\loja\shop\model\OrderItem.java =====
+
+package com.loja.shop.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "order_items")
+@Getter @Setter @NoArgsConstructor
+public class OrderItem {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private CustomerOrder order;
+    private Long productId;
+    private String name;
+    private BigDecimal price;   // preÃ§o no momento da compra
+    private Integer quantity;
+    private String description;
+    private String productImage;
+}
+
+
+===== .\src\main\java\com\loja\shop\model\Product.java =====
+
+package com.loja.shop.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "products")
+@Getter @Setter @NoArgsConstructor
+public class Product {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("_id")   // o front usa _id
+    private Long id;
+    private String name;
+    @Column(length = 1000)
+    private String description;
+    @Column(nullable = false)
+    private BigDecimal price;
+    @JsonProperty("product_image")   // o front usa product_image
+    private String image;
+    private String category;
+}
+
+===== .\src\main\java\com\loja\shop\repository\OrderRepository.java =====
+
+package com.loja.shop.repository;
+
+import com.loja.shop.model.CustomerOrder;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface OrderRepository extends JpaRepository<CustomerOrder, Long> {
+    List<CustomerOrder> findByUser_IdOrderByCreatedAtDesc(Long userId);
+}
+
+
+===== .\src\main\java\com\loja\shop\repository\ProductRepository.java =====
+
+package com.loja.shop.repository;
+
+import com.loja.shop.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProductRepository extends JpaRepository<Product, Long> {}
+
+
+===== .\src\main\java\com\loja\shop\repository\UserRepository.java =====
+
+package com.loja.shop.repository;
+
+import com.loja.shop.model.AppUser;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<AppUser, Long> {
+    Optional<AppUser> findByEmail(String email);
+    boolean existsByEmail(String email);
+}
+
+
+===== .\src\main\java\com\loja\shop\security\JwtAuthFilter.java =====
+
+package com.loja.shop.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class JwtAuthFilter extends OncePerRequestFilter {
+    public static final String COOKIE = "token";
+    private final JwtService jwt;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws ServletException, IOException {
+        if (req.getCookies() != null) {
+            for (Cookie c : req.getCookies()) {
+                if (COOKIE.equals(c.getName())) {
+                    try {
+                        Long userId = jwt.parseUserId(c.getValue());
+                        SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(userId, null, List.of()));
+                    } catch (Exception ignored) { /* token invÃ¡lido/expirado: segue sem autenticaÃ§Ã£o */ }
+                }
+            }
+        }
+        chain.doFilter(req, res);
+    }
+}
+
+
+===== .\src\main\java\com\loja\shop\security\JwtService.java =====
+
+package com.loja.shop.security;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Service
+public class JwtService {
+    private static final long DAYS_7 = 7L * 24 * 60 * 60 * 1000;
+    private final SecretKey key;
+
+    public JwtService(@Value("${app.jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)); // mÃ­nimo 32 caracteres
+    }
+
+    public String create(Long userId) {
+        Date now = new Date();
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + DAYS_7))
+                .signWith(key)
+                .compact();
+    }
+
+    public Long parseUserId(String token) {
+        String sub = Jwts.parser().verifyWith(key).build()
+                .parseSignedClaims(token).getPayload().getSubject();
+        return Long.valueOf(sub);
+    }
+}
+
